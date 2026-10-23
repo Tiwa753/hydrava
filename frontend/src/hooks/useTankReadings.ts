@@ -9,11 +9,11 @@ export function useTankReadings(tankId: number, sinceHours: number = 24) {
   const readings = MOCK_READINGS.filter(
     (r) => new Date(r.received_at) >= cutoff
   );
-  return { readings, isLoading: false, error: null };
+  return { readings, isLoading: false, error: null, refetch: () => {} };
 }
 
 export function useTankDetail(tankId: number) {
-  return { tank: MOCK_TANK as Tank, isLoading: false, error: null };
+  return { tank: MOCK_TANK as Tank, isLoading: false, error: null, refetch: () => {} };
 }
 
 export function useAlerts(includeResolved: boolean = false) {
@@ -29,5 +29,5 @@ export function useAlerts(includeResolved: boolean = false) {
 }
 
 export function useDevices() {
-  return { devices: [MOCK_DEVICE] as Device[], isLoading: false, error: null };
+  return { devices: [MOCK_DEVICE] as Device[], isLoading: false, error: null, refetch: () => {} };
 }
