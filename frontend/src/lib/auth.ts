@@ -2,6 +2,7 @@
 // Replace with real JWT/session system before production.
 
 const SESSION_KEY = 'hydrava_session';
+const DELETED_ACCOUNTS_KEY = 'hydrava_deleted_accounts';
 
 export interface StaffUser {
   staffId: string;
@@ -31,8 +32,9 @@ function deleteCookie(name: string) {
 }
 
 export function login(staffId: string, password: string): StaffUser | null {
-  const account = DEMO_ACCOUNTS[staffId.toUpperCase()];
-  if (!account || account.password !== password) return null;
+  const normalizedStaffId = staffId.toUpperCase();
+  const account = DEMO_ACCOUNTS[normalizedStaffId];
+  if (!account || account.password !== password || isAccountDeleted(normalizedStaffId)) return null;
   const userJson = JSON.stringify(account.user);
   if (typeof window !== 'undefined') {
     localStorage.setItem(SESSION_KEY, userJson);
@@ -48,6 +50,20 @@ export function logout(): void {
   }
 }
 
+export function deleteCurrentAccount(): boolean {
+  if (typeof window === 'undefined') return false;
+
+  const user = getCurrentUser();
+  if (!user) return false;
+
+  const deletedAccounts = getDeletedAccounts();
+  if (!deletedAccounts.includes(user.staffId)) {
+    localStorage.setItem(DELETED_ACCOUNTS_KEY, JSON.stringify([...deletedAccounts, user.staffId]));
+  }
+  logout();
+  return true;
+}
+
 export function getCurrentUser(): StaffUser | null {
   if (typeof window === 'undefined') return null;
   try {
@@ -60,4 +76,20 @@ export function getCurrentUser(): StaffUser | null {
 
 export function isAuthenticated(): boolean {
   return getCurrentUser() !== null;
+}
+
+function isAccountDeleted(staffId: string): boolean {
+  return getDeletedAccounts().includes(staffId);
+}
+
+function getDeletedAccounts(): string[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const deletedAccounts: unknown = JSON.parse(localStorage.getItem(DELETED_ACCOUNTS_KEY) ?? '[]');
+    return Array.isArray(deletedAccounts)
+      ? deletedAccounts.filter((staffId): staffId is string => typeof staffId === 'string')
+      : [];
+  } catch {
+    return [];
+  }
 }

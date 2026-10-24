@@ -12,6 +12,7 @@ import {
   Droplets,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AccountActions } from './AccountActions';
 
 const navItems = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
@@ -80,6 +81,9 @@ export function Sidebar() {
             </Link>
           );
         })}
+        <div className="mt-3 border-t border-red-500/20 pt-3">
+          <AccountActions />
+        </div>
       </nav>
 
       {/* System Status / Version Footer */}

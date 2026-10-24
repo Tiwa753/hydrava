@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { AccountActions } from './AccountActions';
 import DemoBanner from '@/components/ui/DemoBanner';
 import {
   Menu,
@@ -98,6 +99,9 @@ export function PageWrapper({
                 </Link>
               );
             })}
+            <div className="mt-3 border-t border-red-500/20 pt-3">
+              <AccountActions onAction={() => setMobileMenuOpen(false)} />
+            </div>
           </nav>
         </div>
       )}
