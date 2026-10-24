@@ -4,6 +4,9 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Hydrava Monitor | IoT Water Level Monitoring',
   description: 'Real-time water level monitoring and alert system for storage tanks',
+  icons: {
+    icon: '/hydrava-icon.svg',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
