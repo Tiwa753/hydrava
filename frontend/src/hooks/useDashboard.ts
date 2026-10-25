@@ -1,17 +1,55 @@
-// DEMO MODE: All hooks return static mock data instantly — no API calls, no polling.
-// To re-enable live data, replace these with the real API hooks in lib/api.ts.
+'use client';
 
-import { MOCK_DASHBOARD, MOCK_READINGS, MOCK_TANK, MOCK_ALERTS, MOCK_DEVICE } from '@/lib/mock-data';
-import type { DashboardResponse, Reading, Tank, Alert, Device } from '@/types/water-monitoring';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { api } from '@/lib/api';
+import type { DashboardResponse } from '@/types/water-monitoring';
+
+const REFRESH_INTERVAL_MS = 5000;
 
 export function useDashboard() {
+  const [data, setData] = useState<DashboardResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const hasLoaded = useRef(false);
+
+  const fetchDashboard = useCallback(async () => {
+    if (!hasLoaded.current) {
+      setIsLoading(true);
+    }
+
+    try {
+      const response = await api.getDashboard();
+      setData(response);
+      setLastUpdated(new Date());
+      hasLoaded.current = true;
+      setError(null);
+    } catch (fetchError) {
+      setError(
+        fetchError instanceof Error ? fetchError.message : 'Unable to load dashboard data.'
+      );
+    } finally {
+      hasLoaded.current = true;
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchDashboard();
+    const interval = window.setInterval(() => {
+      void fetchDashboard();
+    }, REFRESH_INTERVAL_MS);
+
+    return () => window.clearInterval(interval);
+  }, [fetchDashboard]);
+
   return {
-    data: MOCK_DASHBOARD as DashboardResponse,
-    isLoading: false,
-    error: null,
+    data,
+    isLoading,
+    error,
     isConnected: false,
-    isPolling: false,
-    lastUpdated: new Date(),
-    refetch: () => {},
+    isPolling: !error,
+    lastUpdated,
+    refetch: fetchDashboard,
   };
 }

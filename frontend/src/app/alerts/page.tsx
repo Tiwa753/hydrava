@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 export default function AlertsPage() {
   const [showResolved, setShowResolved] = useState<boolean>(false);
   const [severityFilter, setSeverityFilter] = useState<'all' | 'warning' | 'critical'>('all');
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const { alerts, isLoading, error, refetch } = useAlerts(showResolved);
 
@@ -26,18 +27,20 @@ export default function AlertsPage() {
   const handleAcknowledge = async (id: number) => {
     try {
       await api.acknowledgeAlert(id, { is_acknowledged: true });
+      setActionError(null);
       refetch();
-    } catch {
-      // ignore
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : 'Unable to acknowledge alert.');
     }
   };
 
   const handleResolve = async (id: number) => {
     try {
       await api.acknowledgeAlert(id, { is_resolved: true });
+      setActionError(null);
       refetch();
-    } catch {
-      // ignore
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : 'Unable to resolve alert.');
     }
   };
 
@@ -140,6 +143,12 @@ export default function AlertsPage() {
             </div>
           </div>
         </div>
+
+        {(error || actionError) && (
+          <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-300">
+            {actionError || error}
+          </div>
+        )}
 
         {/* Alerts List */}
         <AlertList

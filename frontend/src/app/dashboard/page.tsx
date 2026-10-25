@@ -39,7 +39,13 @@ export default function DashboardPage() {
         />
       ) : (
         <div className="space-y-8">
-          {/* Header intro */}
+      {error && data && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-300">
+          Live data could not be refreshed: {error}. Showing the last available data.
+        </div>
+      )}
+
+      {/* Header intro */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-blue-900/20 pb-4">
             <div>
               <h2 className="text-2xl font-bold tracking-tight text-white">

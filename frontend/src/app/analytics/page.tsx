@@ -28,25 +28,35 @@ import {
 export default function AnalyticsPage() {
   const [tankId, setTankId] = useState<number>(1);
   const [tanksList, setTanksList] = useState<Tank[]>([]);
+  const [tanksError, setTanksError] = useState<string | null>(null);
 
   // Fetch tanks to populate dropdown
   useEffect(() => {
+    let isMounted = true;
     api
       .getTanks()
       .then((tanks) => {
+        if (!isMounted) return;
         setTanksList(tanks);
+        setTanksError(null);
         if (tanks.length > 0 && !tanks.some((t) => t.id === tankId)) {
           setTankId(tanks[0].id);
         }
       })
-      .catch(() => {
-        // fallback
+      .catch((error: unknown) => {
+        if (isMounted) {
+          setTanksError(error instanceof Error ? error.message : 'Unable to load tanks.');
+        }
       });
+    return () => {
+      isMounted = false;
+    };
   }, [tankId]);
 
   const {
     tank,
     isLoading: isTankLoading,
+    error: tankError,
     refetch: refetchTank,
   } = useTankDetail(tankId);
 
@@ -54,6 +64,7 @@ export default function AnalyticsPage() {
   const {
     readings,
     isLoading: isReadingsLoading,
+    error: readingsError,
     refetch: refetchReadings,
   } = useTankReadings(tankId, 168);
 
@@ -147,6 +158,12 @@ export default function AnalyticsPage() {
             </div>
           )}
         </div>
+
+        {(tanksError || tankError || readingsError) && (
+          <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-300">
+            {tanksError || tankError || readingsError}
+          </div>
+        )}
 
         {/* 1. Statistics Cards Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

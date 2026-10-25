@@ -6,7 +6,7 @@ import { useDashboard } from '@/hooks/useDashboard';
 import { Waves } from 'lucide-react';
 
 export default function TanksPage() {
-  const { data, isLoading, isConnected, isPolling, lastUpdated, refetch } = useDashboard();
+  const { data, isLoading, error, isConnected, isPolling, lastUpdated, refetch } = useDashboard();
 
   return (
     <PageWrapper
@@ -17,6 +17,12 @@ export default function TanksPage() {
       onRefresh={refetch}
     >
       <div className="space-y-6">
+        {error && (
+          <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-300">
+            Unable to refresh tank data: {error}
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-blue-900/20 pb-4">
           <div>
             <div className="flex items-center gap-3">

@@ -43,6 +43,7 @@ export default function TankDetailPage() {
   const params = useParams();
   const tankId = Number(params.tankId);
   const [selectedHours, setSelectedHours] = useState<number>(24);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const {
     tank,
@@ -54,30 +55,34 @@ export default function TankDetailPage() {
   const {
     readings,
     isLoading: isReadingsLoading,
+    error: readingsError,
     refetch: refetchReadings,
   } = useTankReadings(tankId, selectedHours);
 
   const {
     alerts,
     isLoading: isAlertsLoading,
+    error: alertsError,
     refetch: refetchAlerts,
   } = useAlerts(false);
 
   const handleAcknowledge = async (id: number) => {
     try {
       await api.acknowledgeAlert(id, { is_acknowledged: true });
+      setActionError(null);
       refetchAlerts();
-    } catch {
-      // ignore
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : 'Unable to acknowledge alert.');
     }
   };
 
   const handleResolve = async (id: number) => {
     try {
       await api.acknowledgeAlert(id, { is_resolved: true });
+      setActionError(null);
       refetchAlerts();
-    } catch {
-      // ignore
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : 'Unable to resolve alert.');
     }
   };
 
@@ -99,14 +104,16 @@ export default function TankDetailPage() {
 
   if (tankError || !tank) {
     return (
-      <PageWrapper title="Tank Not Found">
+      <PageWrapper title={tankError ? 'Unable to Load Tank' : 'Tank Not Found'}>
         <div className="hydrava-card p-12 text-center max-w-lg mx-auto my-12 border border-rose-500/20">
           <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mx-auto mb-4">
             <AlertTriangle className="w-6 h-6" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">Storage Tank Not Found</h3>
+          <h3 className="text-xl font-bold text-white mb-2">
+            {tankError ? 'Could Not Load Storage Tank' : 'Storage Tank Not Found'}
+          </h3>
           <p className="text-sm text-slate-400 mb-6">
-            The requested tank ID (#{tankId}) could not be retrieved from the telemetry registry.
+            {tankError || `The requested tank ID (#${tankId}) could not be retrieved from the telemetry registry.`}
           </p>
           <Link
             href="/dashboard"
@@ -131,6 +138,12 @@ export default function TankDetailPage() {
       isConnected={tank.device_status === 'online'}
     >
       <div className="space-y-6">
+        {(readingsError || alertsError || actionError) && (
+          <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-300">
+            {actionError || readingsError || alertsError}
+          </div>
+        )}
+
         {/* Navigation & Overview Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-blue-900/20 pb-5">
           <div className="flex items-center gap-4">

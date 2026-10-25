@@ -12,12 +12,35 @@ import { Cpu, Wifi, WifiOff, Radio, RefreshCw, CheckCircle2 } from 'lucide-react
 export default function DevicesPage() {
   const { devices, isLoading, error, refetch } = useDevices();
   const [tanks, setTanks] = useState<Tank[]>([]);
+  const [tanksError, setTanksError] = useState<string | null>(null);
 
   useEffect(() => {
-    api
-      .getTanks()
-      .then(setTanks)
-      .catch(() => {});
+    let isMounted = true;
+    const fetchTanks = async () => {
+      try {
+        const response = await api.getTanks();
+        if (isMounted) {
+          setTanks(response);
+          setTanksError(null);
+        }
+      } catch (fetchError) {
+        if (isMounted) {
+          setTanksError(
+            fetchError instanceof Error ? fetchError.message : 'Unable to load tanks.'
+          );
+        }
+      }
+    };
+
+    void fetchTanks();
+    const interval = window.setInterval(() => {
+      void fetchTanks();
+    }, 5000);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(interval);
+    };
   }, []);
 
   const getTankInfo = (tankId: number) => {
@@ -69,6 +92,12 @@ export default function DevicesPage() {
   return (
     <PageWrapper title="Device Management" onRefresh={refetch}>
       <div className="space-y-6">
+        {(error || tanksError) && (
+          <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-300">
+            {error || tanksError}
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-blue-900/20 pb-5">
           <div>
@@ -115,7 +144,12 @@ export default function DevicesPage() {
                   {devices.map((device) => {
                     const assignedTank = getTankInfo(device.tank_id);
                     const latestReading = assignedTank?.latest_reading;
-                    const isOnline = device.is_online || device.status === 'online';
+                    const isOnline = device.is_online;
+                    const statusLabel = device.last_seen_at
+                      ? isOnline
+                        ? 'Online'
+                        : 'Offline'
+                      : 'Unknown';
 
                     return (
                       <tr
@@ -158,7 +192,7 @@ export default function DevicesPage() {
                                 isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'
                               )}
                             />
-                            <span className="capitalize">{device.status || (isOnline ? 'Online' : 'Offline')}</span>
+                            <span>{statusLabel}</span>
                           </span>
                         </td>
 

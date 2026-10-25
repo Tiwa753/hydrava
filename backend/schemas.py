@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ReadingCreate(BaseModel):
@@ -43,6 +43,14 @@ class TankResponse(BaseModel):
     latest_reading: Optional[ReadingResponse] = None
     current_status: str
     device_status: str
+
+
+class TankUpdate(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1)
+    location: Optional[str] = Field(default=None, min_length=1)
+    reference_height_cm: Optional[float] = Field(default=None, gt=0)
+    low_threshold_percent: Optional[float] = Field(default=None, ge=0, le=100)
+    critical_threshold_percent: Optional[float] = Field(default=None, ge=0, le=100)
 
 
 class DeviceResponse(BaseModel):
