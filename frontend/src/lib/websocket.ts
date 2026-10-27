@@ -1,6 +1,8 @@
 import { DashboardResponse } from '@/types/water-monitoring';
 
-const WS_BASE = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000';
+const WS_BASE =
+  process.env.NEXT_PUBLIC_WS_URL ||
+  (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/^http/, 'ws');
 
 export class DashboardWebSocket {
   private ws: WebSocket | null = null;

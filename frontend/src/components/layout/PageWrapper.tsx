@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { AccountActions } from './AccountActions';
-import DemoBanner from '@/components/ui/DemoBanner';
 import {
   Menu,
   X,
@@ -108,7 +107,6 @@ export function PageWrapper({
 
       {/* Main Content Area */}
       <div className="flex-1 lg:pl-[260px] flex flex-col min-h-screen min-w-0 bg-grid">
-        <DemoBanner />
         <Header
           title={title}
           isConnected={isConnected}
