@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 import json
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI  # type: ignore[import-not-found]
+from fastapi.middleware.cors import CORSMiddleware  # type: ignore[import-not-found]
 from database import SessionLocal, init_db
 from routers.alerts import router as alerts_router
 from routers.dashboard import router as dashboard_router
