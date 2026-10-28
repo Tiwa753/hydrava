@@ -8,6 +8,19 @@ import {
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
 
+export class ApiError extends Error {
+  constructor(message: string, public readonly status: number) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+export interface StaffAuthResponse {
+  staff_id: string;
+  name: string;
+  role: 'supervisor' | 'admin';
+}
+
 async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   const url = `${API_BASE}/api/v1${normalizedPath}`;
@@ -36,13 +49,25 @@ async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
     } catch {
       // response was not JSON, retain default error message
     }
-    throw new Error(errorMessage);
+    throw new ApiError(errorMessage, response.status);
   }
 
   return response.json() as Promise<T>;
 }
 
 export const api = {
+  registerStaff: (data: { staff_id: string; full_name: string; password: string }) =>
+    fetchApi<StaffAuthResponse>('/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
+  loginStaff: (data: { staff_id: string; password: string }) =>
+    fetchApi<StaffAuthResponse>('/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
   getDashboard: () => fetchApi<DashboardResponse>('/dashboard/summary'),
   getTanks: () => fetchApi<Tank[]>('/tanks'),
   getTank: (id: number) => fetchApi<Tank>(`/tanks/${id}`),

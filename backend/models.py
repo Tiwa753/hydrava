@@ -77,5 +77,14 @@ class Alert(Base):
     acknowledged_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     resolved_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     last_reading_percent: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-
     tank: Mapped["Tank"] = relationship("Tank", back_populates="alerts")
+
+
+class StaffAccount(Base):
+    __tablename__ = "staff_accounts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    staff_id: Mapped[str] = mapped_column(String(8), unique=True, index=True, nullable=False)
+    full_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(256), nullable=False)
+    role: Mapped[str] = mapped_column(String(20), default="supervisor", nullable=False)

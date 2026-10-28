@@ -107,3 +107,20 @@ class TankStatusItem(BaseModel):
 class DashboardResponse(BaseModel):
     summary: DashboardSummary
     tanks: List[TankStatusItem]
+
+
+class StaffRegister(BaseModel):
+    staff_id: str = Field(min_length=6, max_length=8, pattern=r"(?i)^[A-Z]{2,4}-\d{3}$")
+    full_name: str = Field(min_length=1, max_length=120)
+    password: str = Field(min_length=8, max_length=128)
+
+
+class StaffLogin(BaseModel):
+    staff_id: str = Field(min_length=1, max_length=8)
+    password: str = Field(min_length=1, max_length=128)
+
+
+class StaffAccountResponse(BaseModel):
+    staff_id: str
+    name: str
+    role: str

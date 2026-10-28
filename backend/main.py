@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI  # type: ignore[import-not-found]
 from fastapi.middleware.cors import CORSMiddleware  # type: ignore[import-not-found]
 from database import SessionLocal, init_db
+from routers.auth import router as auth_router
 from routers.alerts import router as alerts_router
 from routers.dashboard import router as dashboard_router
 from routers.devices import router as devices_router
@@ -59,6 +60,7 @@ app.add_middleware(
 )
 
 # Register routers with /api/v1 prefix
+app.include_router(auth_router, prefix="/api/v1")
 app.include_router(readings_router, prefix="/api/v1")
 app.include_router(tanks_router, prefix="/api/v1")
 app.include_router(alerts_router, prefix="/api/v1")

@@ -1,5 +1,6 @@
-// Simple cookie + localStorage auth for demo purposes.
-// Replace with real JWT/session system before production.
+// Credentials are verified by the API; the browser session remains demo-only.
+
+import { ApiError, api, type StaffAuthResponse } from '@/lib/api';
 
 const SESSION_KEY = 'hydrava_session';
 const DELETED_ACCOUNTS_KEY = 'hydrava_deleted_accounts';
@@ -10,18 +11,6 @@ export interface StaffUser {
   role: 'supervisor' | 'admin';
 }
 
-// Hardcoded demo accounts — replace with a real backend auth endpoint
-const DEMO_ACCOUNTS: Record<string, { password: string; user: StaffUser }> = {
-  'SUP-001': {
-    password: 'hydrava123',
-    user: { staffId: 'SUP-001', name: 'Supervisor A', role: 'supervisor' },
-  },
-  'ADM-001': {
-    password: 'admin2026',
-    user: { staffId: 'ADM-001', name: 'Administrator', role: 'admin' },
-  },
-};
-
 function setCookie(name: string, value: string, days = 7) {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
@@ -31,16 +20,29 @@ function deleteCookie(name: string) {
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
 }
 
-export function login(staffId: string, password: string): StaffUser | null {
+export async function login(staffId: string, password: string): Promise<StaffUser | null> {
   const normalizedStaffId = staffId.toUpperCase();
-  const account = DEMO_ACCOUNTS[normalizedStaffId];
-  if (!account || account.password !== password || isAccountDeleted(normalizedStaffId)) return null;
-  const userJson = JSON.stringify(account.user);
+  if (isAccountDeleted(normalizedStaffId)) return null;
+
+  let response: StaffAuthResponse;
+  try {
+    response = await api.loginStaff({ staff_id: normalizedStaffId, password });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return null;
+    throw error;
+  }
+
+  const user: StaffUser = {
+    staffId: response.staff_id,
+    name: response.name,
+    role: response.role,
+  };
+  const userJson = JSON.stringify(user);
   if (typeof window !== 'undefined') {
     localStorage.setItem(SESSION_KEY, userJson);
     setCookie(SESSION_KEY, userJson);
   }
-  return account.user;
+  return user;
 }
 
 export function logout(): void {

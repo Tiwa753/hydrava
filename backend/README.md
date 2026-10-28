@@ -5,14 +5,30 @@
 pip install -r requirements.txt
 ```
 
-## Run
-```bash
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+## Run (PowerShell)
+From the repository root:
+```powershell
+cd .\backend
+.\.venv\Scripts\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
+
+Alternatively, run `.\backend\start.ps1` from the repository root. Both commands
+use the backend virtual environment and do not reinstall dependencies.
 
 ## API Docs
 - Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs)
 - ReDoc: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+
+## Staff accounts
+
+Staff can create an account from the frontend sign-up page. The API stores a
+password hash and uses the Staff ID as the unique account identifier:
+
+- `POST /api/v1/auth/register` with `staff_id`, `full_name`, and `password`
+- `POST /api/v1/auth/login` with `staff_id` and `password`
+
+New self-registered accounts receive the `supervisor` role. Duplicate Staff IDs
+return `409 Conflict`.
 
 ## Live sensor readings
 

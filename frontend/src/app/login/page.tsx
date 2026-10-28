@@ -26,14 +26,17 @@ export default function LoginPage() {
       return;
     }
     setIsLoading(true);
-    // Simulate brief network delay for realism
-    await new Promise((r) => setTimeout(r, 600));
-    const user = login(staffId.trim(), password);
-    setIsLoading(false);
-    if (user) {
-      router.push('/dashboard');
-    } else {
-      setError('Invalid Staff ID or password. Please try again.');
+    try {
+      const user = await login(staffId.trim(), password);
+      if (user) {
+        router.push('/dashboard');
+      } else {
+        setError('Invalid Staff ID or password. Please try again.');
+      }
+    } catch {
+      setError('Unable to sign in right now. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -143,18 +146,10 @@ export default function LoginPage() {
                 href="/signup"
                 className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
               >
-                Request access
+                Create an account
               </Link>
             </p>
           </div>
-        </div>
-
-        {/* Demo hint */}
-        <div className="mt-4 text-center">
-          <p className="text-slate-600 text-xs">
-            Demo: <span className="text-slate-500 font-mono">SUP-001</span> /{' '}
-            <span className="text-slate-500 font-mono">hydrava123</span>
-          </p>
         </div>
 
         <p className="text-center text-slate-700 text-xs mt-6">

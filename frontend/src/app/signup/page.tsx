@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, Droplets, Lock, IdCard, User, AlertCircle, CheckCircle } from 'lucide-react';
+import { ApiError, api } from '@/lib/api';
 import { isAuthenticated } from '@/lib/auth';
 
 export default function SignupPage() {
@@ -16,6 +17,7 @@ export default function SignupPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [accountExists, setAccountExists] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -23,7 +25,7 @@ export default function SignupPage() {
     if (isAuthenticated()) router.replace('/dashboard');
   }, [router]);
 
-  const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+  const set = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [field]: e.target.value }));
 
   const validate = () => {
@@ -39,14 +41,31 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setAccountExists(false);
     const err = validate();
     if (err) { setError(err); return; }
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setIsLoading(false);
-    // In a real system this POSTs to /api/v1/auth/register
-    // For demo, just show success
-    setSubmitted(true);
+    try {
+      await api.registerStaff({
+        staff_id: form.staffId.trim().toUpperCase(),
+        full_name: form.fullName.trim(),
+        password: form.password,
+      });
+      setSubmitted(true);
+    } catch (requestError) {
+      if (requestError instanceof ApiError && requestError.status === 409) {
+        setAccountExists(true);
+        setError('A user with this Staff ID already exists.');
+      } else {
+        setError(
+          requestError instanceof Error
+            ? requestError.message
+            : 'Unable to create your account right now. Please try again.'
+        );
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (submitted) {
@@ -56,9 +75,9 @@ export default function SignupPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-green-600/20 border border-green-500/30 mb-4">
             <CheckCircle className="w-8 h-8 text-green-400" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Request Submitted</h2>
+          <h2 className="text-2xl font-bold text-white mb-2">Account Created</h2>
           <p className="text-slate-400 text-sm mb-6">
-            Your access request for <span className="text-white font-mono">{form.staffId.toUpperCase()}</span> has been sent to the system administrator for approval.
+            Your account for <span className="text-white font-mono">{form.staffId.toUpperCase()}</span> is ready. Sign in to continue.
           </p>
           <Link
             href="/login"
@@ -89,9 +108,9 @@ export default function SignupPage() {
 
         <div className="hydrava-card p-8 shadow-2xl shadow-black/40">
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-white">Request Access</h2>
+            <h2 className="text-xl font-semibold text-white">Create Account</h2>
             <p className="text-slate-400 text-sm mt-1">
-              Submit your details. An administrator will approve your account.
+              Enter your staff details to create an account.
             </p>
           </div>
 
@@ -109,7 +128,7 @@ export default function SignupPage() {
                   className="w-full bg-[#0d1528] border border-blue-900/40 text-white placeholder-slate-600 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all"
                 />
               </div>
-              <p className="text-slate-600 text-xs mt-1">Format: SUP-001, ADM-002, etc.</p>
+              <p className="text-slate-600 text-xs mt-1">Use your staff ID, such as SUP-002.</p>
             </div>
 
             {/* Full Name */}
@@ -167,7 +186,14 @@ export default function SignupPage() {
             {error && (
               <div className="flex items-start gap-2.5 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 animate-fade-in">
                 <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                <p className="text-red-400 text-sm">{error}</p>
+                <p className="text-red-400 text-sm">
+                  {error}{' '}
+                  {accountExists && (
+                    <Link href="/login" className="font-medium text-blue-300 underline underline-offset-2 hover:text-blue-200">
+                      Sign in
+                    </Link>
+                  )}
+                </p>
               </div>
             )}
 
@@ -179,17 +205,17 @@ export default function SignupPage() {
               {isLoading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Submitting…
+                  Creating account…
                 </>
               ) : (
-                'Submit Request'
+                'Create Account'
               )}
             </button>
           </form>
 
           <div className="mt-6 pt-5 border-t border-blue-900/30 text-center">
             <p className="text-slate-500 text-sm">
-              Already have access?{' '}
+              Already have an account?{' '}
               <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
                 Sign in
               </Link>

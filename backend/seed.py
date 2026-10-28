@@ -11,8 +11,11 @@ def run_seed(db: Session) -> None:
     existing_tank = db.scalars(
         select(Tank).where(Tank.name == "Male Hostel Water Tank")
     ).first()
-    if existing_tank:
-        print("[Seed] Database already seeded. Skipping.")
+    existing_device = db.scalars(
+        select(Device).where(Device.device_id == "hydrava-node-001")
+    ).first()
+    if existing_tank or existing_device:
+        print("[Seed] Seed tank or device already exists. Skipping.")
         return
 
     print("[Seed] Seeding database with initial tank, device, readings, and alerts...")
