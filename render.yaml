@@ -23,4 +23,4 @@ services:
           name: hydrava-db
           property: connectionString
       - key: CORS_ORIGINS
-        value: "[]"
+        value: '["https://hydrava.netlify.app"]'

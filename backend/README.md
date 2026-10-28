@@ -52,7 +52,7 @@ automatically copied to the new PostgreSQL database.
    The frontend derives its WebSocket URL from this API URL.
 3. In the Render `hydrava-api` environment, set `CORS_ORIGINS` to a JSON array
    containing the exact Netlify site origin, for example
-   `["https://your-site.netlify.app"]`, then redeploy/restart the service.
+   `["https://hydrava.netlify.app"]`, then redeploy/restart the service.
 4. Open the Netlify HTTPS site, create an account, and sign in. The new
    PostgreSQL database starts empty; accounts in the local SQLite database
    must be created again unless you migrate them separately.
