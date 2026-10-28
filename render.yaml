@@ -1,0 +1,26 @@
+databases:
+  - name: hydrava-db
+    databaseName: hydrava
+    user: hydrava
+    plan: basic-256mb
+    region: oregon
+
+services:
+  - type: web
+    name: hydrava-api
+    runtime: python
+    plan: starter
+    region: oregon
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.3
+      - key: DATABASE_URL
+        fromDatabase:
+          name: hydrava-db
+          property: connectionString
+      - key: CORS_ORIGINS
+        value: "[]"

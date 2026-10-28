@@ -6,7 +6,34 @@ import {
   Tank,
 } from '@/types/water-monitoring';
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
+
+function isLocalHost(hostname: string): boolean {
+  return LOCAL_HOSTS.has(hostname);
+}
+
+function resolveBrowserHost(url: URL): URL {
+  if (
+    typeof window !== 'undefined' &&
+    isLocalHost(url.hostname) &&
+    !isLocalHost(window.location.hostname)
+  ) {
+    url.hostname = window.location.hostname;
+  }
+  return url;
+}
+
+export function getApiBaseUrl(): string {
+  const configuredUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  return resolveBrowserHost(new URL(configuredUrl)).toString().replace(/\/+$/, '');
+}
+
+export function getWebSocketBaseUrl(): string {
+  const configuredUrl = process.env.NEXT_PUBLIC_WS_URL;
+  if (!configuredUrl) return getApiBaseUrl().replace(/^http/, 'ws');
+
+  return resolveBrowserHost(new URL(configuredUrl)).toString().replace(/\/+$/, '');
+}
 
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number) {
@@ -23,7 +50,7 @@ export interface StaffAuthResponse {
 
 async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  const url = `${API_BASE}/api/v1${normalizedPath}`;
+  const url = `${getApiBaseUrl()}/api/v1${normalizedPath}`;
 
   const defaultHeaders: HeadersInit = {
     Accept: 'application/json',

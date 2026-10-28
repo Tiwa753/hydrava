@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useTankDetail } from '@/hooks/useTankReadings';
-import { api } from '@/lib/api';
+import { api, getApiBaseUrl } from '@/lib/api';
 import {
   Settings,
   Save,
@@ -36,7 +36,13 @@ export default function SettingsPage() {
   // Health and System state
   const [healthStatus, setHealthStatus] = useState<'checking' | 'healthy' | 'offline'>('checking');
   const [backendVersion, setBackendVersion] = useState<string>('v1.0.0');
+  const [apiBaseUrl, setApiBaseUrl] = useState(
+    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+  );
 
+  useEffect(() => {
+    setApiBaseUrl(getApiBaseUrl());
+  }, []);
   // Populate form when tank data loads
   useEffect(() => {
     if (tank) {
@@ -329,7 +335,7 @@ export default function SettingsPage() {
             <div className="p-3.5 rounded-lg bg-slate-900/80 border border-slate-800">
               <span className="text-slate-400 block mb-1">API Base URL</span>
               <span className="font-mono text-slate-300 text-xs">
-                {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}
+                {apiBaseUrl}
               </span>
             </div>
 
