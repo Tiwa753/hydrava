@@ -22,10 +22,7 @@ def compute_dashboard_data(db: Session) -> DashboardResponse:
     # Calculate offline devices
     offline_devices_count = 0
     for device in devices:
-        if (
-            device.last_seen_at is None
-            or (now - device.last_seen_at).total_seconds() >= DEVICE_OFFLINE_TIMEOUT
-        ):
+        if not crud.is_recent(device.last_seen_at, DEVICE_OFFLINE_TIMEOUT):
             offline_devices_count += 1
 
     # Calculate critical unresolved alerts
@@ -59,8 +56,11 @@ def compute_dashboard_data(db: Session) -> DashboardResponse:
         if tank.devices:
             dev = tank.devices[0]
             if dev.last_seen_at is not None:
-                diff = (now - dev.last_seen_at).total_seconds()
-                device_status = "online" if diff < DEVICE_OFFLINE_TIMEOUT else "offline"
+                device_status = (
+                    "online"
+                    if crud.is_recent(dev.last_seen_at, DEVICE_OFFLINE_TIMEOUT)
+                    else "offline"
+                )
 
         tank_items.append(
             TankStatusItem(

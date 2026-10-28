@@ -46,7 +46,10 @@ export function useTankReadings(tankId: number, sinceHours: number = 24) {
   return { readings, isLoading, error, refetch: fetchReadings };
 }
 
-export function useTankDetail(tankId: number) {
+export function useTankDetail(
+  tankId: number,
+  refreshIntervalMs: number = REFRESH_INTERVAL_MS
+) {
   const [tank, setTank] = useState<Tank | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,12 +79,14 @@ export function useTankDetail(tankId: number) {
 
   useEffect(() => {
     void fetchTank();
-    const interval = window.setInterval(() => {
-      void fetchTank();
-    }, REFRESH_INTERVAL_MS);
+    if (refreshIntervalMs <= 0) {
+      return;
+    }
+
+    const interval = window.setInterval(() => void fetchTank(), refreshIntervalMs);
 
     return () => window.clearInterval(interval);
-  }, [fetchTank]);
+  }, [fetchTank, refreshIntervalMs]);
 
   return { tank, isLoading, error, refetch: fetchTank };
 }

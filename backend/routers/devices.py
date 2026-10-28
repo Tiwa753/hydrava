@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 import os
 from typing import List
 from fastapi import APIRouter, Depends
@@ -15,13 +14,8 @@ DEVICE_OFFLINE_TIMEOUT = float(os.getenv("DEVICE_OFFLINE_TIMEOUT_SECONDS", "30")
 @router.get("/devices", response_model=List[DeviceResponse])
 def get_devices(db: Session = Depends(get_db)) -> List[DeviceResponse]:
     devices = crud.get_all_devices(db)
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
     responses = []
     for device in devices:
-        is_online = (
-            device.last_seen_at is not None
-            and (now - device.last_seen_at).total_seconds() < DEVICE_OFFLINE_TIMEOUT
-        )
         responses.append(
             DeviceResponse(
                 id=device.id,
@@ -30,7 +24,7 @@ def get_devices(db: Session = Depends(get_db)) -> List[DeviceResponse]:
                 status=device.status,
                 last_seen_at=device.last_seen_at,
                 created_at=device.created_at,
-                is_online=is_online,
+                is_online=crud.is_recent(device.last_seen_at, DEVICE_OFFLINE_TIMEOUT),
             )
         )
     return responses

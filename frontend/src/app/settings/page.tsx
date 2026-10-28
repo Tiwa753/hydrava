@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 
 export default function SettingsPage() {
   const [selectedTankId, setSelectedTankId] = useState<number>(1);
-  const { tank, isLoading, error: tankError, refetch } = useTankDetail(selectedTankId);
+  const { tank, isLoading, error: tankError, refetch } = useTankDetail(selectedTankId, 0);
 
   // Form states
   const [name, setName] = useState('');
@@ -92,15 +92,19 @@ export default function SettingsPage() {
 
     setIsSaving(true);
     try {
-      await api.updateTankSettings(selectedTankId, {
+      const savedTank = await api.updateTankSettings(selectedTankId, {
         name,
         location,
         reference_height_cm: Number(refHeight),
         low_threshold_percent: Number(lowThreshold),
         critical_threshold_percent: Number(critThreshold),
       });
+      setName(savedTank.name);
+      setLocation(savedTank.location);
+      setRefHeight(savedTank.reference_height_cm);
+      setLowThreshold(savedTank.low_threshold_percent);
+      setCritThreshold(savedTank.critical_threshold_percent);
       setSaveSuccess(true);
-      refetch();
       setTimeout(() => setSaveSuccess(false), 4000);
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : 'Failed to update tank configuration');
@@ -134,6 +138,20 @@ export default function SettingsPage() {
         {isLoading && !tank ? (
           <div className="py-12 flex justify-center">
             <LoadingSpinner size="md" label="Loading vessel configuration..." />
+          </div>
+        ) : tankError && !tank ? (
+          <div
+            role="alert"
+            className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm"
+          >
+            <p>Unable to load vessel configuration: {tankError}</p>
+            <button
+              type="button"
+              onClick={() => void refetch()}
+              className="mt-3 font-semibold text-white underline underline-offset-2"
+            >
+              Try again
+            </button>
           </div>
         ) : (
           <form onSubmit={handleSave} className="space-y-6">

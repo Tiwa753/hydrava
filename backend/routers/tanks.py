@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 import os
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -33,9 +32,11 @@ def compute_device_status(devices: List[Device]) -> str:
     device = devices[0]
     if device.last_seen_at is None:
         return "unknown"
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
-    diff = (now - device.last_seen_at).total_seconds()
-    return "online" if diff < DEVICE_OFFLINE_TIMEOUT else "offline"
+    return (
+        "online"
+        if crud.is_recent(device.last_seen_at, DEVICE_OFFLINE_TIMEOUT)
+        else "offline"
+    )
 
 
 def build_tank_response(db: Session, tank: Tank) -> TankResponse:

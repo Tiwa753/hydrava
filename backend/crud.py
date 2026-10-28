@@ -9,6 +9,14 @@ def utcnow() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
+def is_recent(timestamp: Optional[datetime], timeout_seconds: float) -> bool:
+    if timestamp is None:
+        return False
+    if timestamp.tzinfo is not None:
+        timestamp = timestamp.astimezone(timezone.utc).replace(tzinfo=None)
+    return (utcnow() - timestamp).total_seconds() < timeout_seconds
+
+
 def get_tank(db: Session, tank_id: int) -> Optional[Tank]:
     return db.get(Tank, tank_id)
 
