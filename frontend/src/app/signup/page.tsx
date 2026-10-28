@@ -226,6 +226,9 @@ export default function SignupPage() {
         <p className="text-center text-slate-700 text-xs mt-6">
           © 2026 Hydrava · IoT Water Monitoring System
         </p>
+        <p className="text-center text-slate-700 text-xs mt-1">
+          Group 27-SWEP200
+        </p>
       </div>
     </div>
   );
