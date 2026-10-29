@@ -66,8 +66,9 @@ Public signup also has no email verification or rate limiting.
 ## Live sensor readings
 
 Set `SIMULATOR_ENABLED=false` in `backend/.env` to prevent generated readings from
-overwriting sensor data. The backend accepts device readings at `POST /api/v1/readings`;
-the device must be registered in the database and send its `device_id`, `distance_cm`,
+overwriting sensor data. Configure the device to POST a reading to `/api/v1/readings`
+every 15 seconds. The backend marks devices offline after 45 seconds without a reading.
+The device must be registered in the database and send its `device_id`, `distance_cm`,
 and optional `wifi_rssi`.
 
 Example:

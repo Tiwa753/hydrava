@@ -6,8 +6,8 @@ import crud
 from database import SessionLocal
 from services.alert_service import evaluate_and_update_alerts
 
-SIMULATOR_INTERVAL = float(os.getenv("SIMULATOR_INTERVAL_SECONDS", "5"))
-OFFLINE_TIMEOUT = float(os.getenv("DEVICE_OFFLINE_TIMEOUT_SECONDS", "30"))
+SIMULATOR_INTERVAL = float(os.getenv("SIMULATOR_INTERVAL_SECONDS", "15"))
+OFFLINE_TIMEOUT = float(os.getenv("DEVICE_OFFLINE_TIMEOUT_SECONDS", "45"))
 
 
 class SensorSimulator:

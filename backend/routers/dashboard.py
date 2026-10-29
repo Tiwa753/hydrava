@@ -9,7 +9,7 @@ from schemas import DashboardResponse, DashboardSummary, TankStatusItem
 
 router = APIRouter(tags=["dashboard"])
 
-DEVICE_OFFLINE_TIMEOUT = float(os.getenv("DEVICE_OFFLINE_TIMEOUT_SECONDS", "30"))
+DEVICE_OFFLINE_TIMEOUT = float(os.getenv("DEVICE_OFFLINE_TIMEOUT_SECONDS", "45"))
 
 
 def compute_dashboard_data(db: Session) -> DashboardResponse:

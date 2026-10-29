@@ -8,7 +8,7 @@ from schemas import DeviceResponse
 
 router = APIRouter(tags=["devices"])
 
-DEVICE_OFFLINE_TIMEOUT = float(os.getenv("DEVICE_OFFLINE_TIMEOUT_SECONDS", "30"))
+DEVICE_OFFLINE_TIMEOUT = float(os.getenv("DEVICE_OFFLINE_TIMEOUT_SECONDS", "45"))
 
 
 @router.get("/devices", response_model=List[DeviceResponse])

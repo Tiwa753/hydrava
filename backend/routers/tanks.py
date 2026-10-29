@@ -9,7 +9,7 @@ from schemas import ReadingResponse, TankResponse, TankUpdate
 
 router = APIRouter(tags=["tanks"])
 
-DEVICE_OFFLINE_TIMEOUT = float(os.getenv("DEVICE_OFFLINE_TIMEOUT_SECONDS", "30"))
+DEVICE_OFFLINE_TIMEOUT = float(os.getenv("DEVICE_OFFLINE_TIMEOUT_SECONDS", "45"))
 
 
 def compute_tank_status(tank: Tank, latest_reading: Optional[Reading]) -> str:
